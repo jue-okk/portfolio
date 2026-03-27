@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joey Zhang - UI/UX Designer</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap" rel="stylesheet">
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Lottie -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-display: 'Bowlby One SC', cursive;
+            --font-body: 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            background: #fff;
+            color: #1a1a1a;
+        }
+
+        /* ===== 导航 ===== */
+        .nav {
+            display: flex;
+            gap: 48px;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 14px 40px;
+            border-radius: 50px;
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav a:hover {
+            color: rgba(255, 255, 255, 1);
+            letter-spacing: 1px;
+        }
+
+        /* ===== Connect 弹窗（非全屏） ===== */
+        .connect-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .connect-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .connect-content {
+            position: relative;
+            padding: 60px 80px;
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            max-width: 90vw;
+        }
+
+        .connect-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .connect-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .connect-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 32px;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+        }
+
+        .connect-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .connect-label {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 300;
+            width: 160px;
+            text-align: right;
+            padding-right: 24px;
+            flex-shrink: 0;
+            font-family: var(--font-body);
+        }
+
+        .connect-value {
+            color: white;
+            font-weight: 400;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            min-width: 260px;
+            font-size: 20px;
+        }
+
+        .connect-copy {
+            margin-left: 20px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 8px 0;
+            width: 70px; /* 固定宽度防止抖动 */
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            background: transparent;
+            font-family: var(--font-body);
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .connect-copy:hover {
+            color: rgba(255, 255, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .connect-copy.copied {
+            color: #4ade80;
+            border-color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+            width: 70px; /* 保持相同宽度 */
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .connect-content {
+                padding: 50px 30px;
+                width: 90%;
+            }
+            
+            .connect-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 28px;
+            }
+            
+            .connect-label {
+                text-align: left;
+                width: auto;
+                padding-right: 0;
+                font-size: 13px;
+            }
+            
+            .connect-value {
+                font-size: 18px;
+                min-width: auto;
+            }
+            
+            .connect-copy {
+                margin-left: 0;
+                margin-top: 8px;
+            }
+        }
+
+        /* ===== Hero Section ===== */
+        .hero {
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(120deg, 
+                #ffe4f0 0%,      
+                #ffe4f0 20%,     
+                #f0fff4 45%,     
+                #ffffff 55%,     
+                #ffffff 100%
+            );
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 140px 20px 40px;
+        }
+
+        .hero-content {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-top: 40px;
+            padding: 0 5%;
+        }
+
+        .greeting {
+            font-size: 24px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            margin-left: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .wave {
+            font-size: 26px;
+            animation: wave 2s infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        .name-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .name-text {
+            font-family: var(--font-display);
+            font-size: clamp(80px, 12vw, 160px);
+            line-height: 0.9;
+            letter-spacing: 4px;
+            white-space: nowrap;
+        }
+
+        .layer-black {
+            position: relative;
+            z-index: 1;
+        }
+
+        .line-joey-black, .line-zhang-black {
+            color: #000;
+            display: block;
+        }
+
+        .portrait-main {
+            position: absolute;
+            right: 0;
+            top: calc(50% - 50px);
+            transform: translateY(-50%);
+            height: 65vh;
+            width: auto;
+            max-width: 42%;
+            object-fit: contain;
+            z-index: 2;
+            pointer-events: none;
+            transition: transform 0.1s ease-out;
+            -webkit-mask-image: linear-gradient(to bottom, 
+                black 0%, 
+                black 80%, 
+                transparent 100%
+            );
+            mask-image: linear-gradient(to bottom, 
+                black 0%, 
+                black 80%, 
+                transparent 100%
+            );
+        }
+
+        .layer-outline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 3;
+            line-height: 0.9;
+        }
+
+        .line-joey-outline, .line-zhang-outline {
+            color: transparent;
+            -webkit-text-stroke: 2px #fff;
+            display: block;
+        }
+
+        .role {
+            font-size: 24px;
+            color: #333;
+            font-weight: 400;
+            text-align: left;
+            margin-top: 5px;
+            margin-left: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ===== Lottie 动画区 ===== */
+        .work-section {
+            width: 100%;
+            background: #fff;
+            position: relative;
+        }
+
+        #animation-wrapper {
+            position: relative;
+            height: 747px;
+            background: #fff;
+            margin-top: 0;
+        }
+
+        #animation {
+            width: 1038px;
+            height: 747px;
+            margin: 0 auto;
+            position: sticky;
+            top: 50px;
+            border: 1px solid #eee;
+            background-color: white;
+            z-index: 5;
+        }
+
+        /* ===== 工作经历 ===== */
+        .experience-section {
+            width: 100%;
+            background: #fff;
+            padding: 120px 5%;
+            position: relative;
+        }
+
+        .experience-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(40px, 6vw, 80px);
+            color: #000;
+            margin-bottom: 100px;
+            letter-spacing: 2px;
+        }
+
+        .experience-item {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 80px;
+            margin-bottom: 100px;
+            position: relative;
+        }
+
+        .experience-item::before {
+            content: '';
+            position: absolute;
+            left: 380px;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: #e0e0e0;
+        }
+
+        .exp-left {
+            text-align: left;
+        }
+
+        .company-header {
+            font-size: 21px;
+            color: #666;
+            font-weight: 300;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .company-name {
+            font-weight: 400;
+        }
+
+        .exp-date {
+            color: #999;
+            font-weight: 300;
+        }
+
+        .job-title {
+            font-size: 42px;
+            color: #000;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -1px;
+            margin-top: 8px;
+        }
+
+        .exp-right {
+            padding-left: 20px;
+            font-size: 18px;
+            line-height: 1.5;
+            color: #333;
+            font-weight: 300;
+        }
+
+        .exp-right p {
+            margin-bottom: 12px;
+        }
+
+        .exp-right strong {
+            color: #000;
+            font-weight: 700;
+        }
+
+        .exp-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .exp-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+            font-size: 18px;
+            line-height: 1.5;
+            color: #333;
+            font-weight: 300;
+        }
+
+        .exp-list li::before {
+            content: '–';
+            position: absolute;
+            left: 0;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .exp-list li strong {
+            font-weight: 700;
+            color: #000;
+        }
+
+        .exp-subtitle {
+            display: block;
+            color: #000;
+            font-weight: 700;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        .highlight-block {
+            margin-top: 16px;
+            font-weight: 700;
+            color: #000;
+            line-height: 1.5;
+            font-size: 18px;
+        }
+
+        /* ===== 作品集部分 ===== */
+        .portfolio-section {
+            width: 100%;
+            background: linear-gradient(to bottom, #f5f5f0 0%, #ebebe5 100%);
+            padding: 100px 20px 0;
+            position: relative;
+        }
+
+        .portfolio-header {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+        }
+
+        .portfolio-header h2 {
+            font-family: var(--font-display);
+            font-size: clamp(40px, 6vw, 80px);
+            color: #2c2c2c;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .portfolio-header p {
+            font-size: 20px;
+            color: #888;
+            font-weight: 400;
+        }
+
+        .portfolio-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 80px 40px;
+            padding: 20px;
+        }
+
+        .category {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            cursor: pointer;
+        }
+
+        .category-label {
+            padding: 10px 24px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 24px;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 24px;
+            border: 1px solid rgba(0,0,0,0.06);
+            font-weight: 300; /* 苹方细体 */
+            letter-spacing: 1px;
+            font-family: var(--font-body); /* 苹方 */
+        }
+
+        .card-stack {
+            position: relative;
+            width: 220px;
+            height: 350px;
+        }
+
+        .card {
+            position: absolute;
+            width: 200px;
+            height: 260px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            left: 10px;
+            top: 45px;
+            transform-origin: center bottom;
+            will-change: transform;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+            background: #f0f0f0;
+            display: block;
+            border-radius: 4px;
+            border: 7px solid white;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 100%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 18px;
+            border-radius: 12px;
+        }
+
+        /* ===== Portfolio 底部联系页 ===== */
+        .portfolio-contact-section {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            margin-top: 100px;
+            padding: 120px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .portfolio-contact-inner {
+            position: relative;
+            padding: 40px 60px;
+        }
+
+        .portfolio-contact-inner .connect-row {
+            font-size: 24px;
+        }
+
+        .portfolio-contact-inner .connect-label {
+            color: rgba(255, 255, 255, 0.5);
+            width: 180px;
+        }
+
+        .portfolio-contact-inner .connect-value {
+            font-size: 22px;
+            min-width: 300px;
+        }
+
+        .portfolio-contact-inner .connect-copy {
+            width: 80px;
+            font-size: 14px;
+        }
+
+        /* ===== 详情页 ===== */
+        .detail-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f5f5f5;
+            z-index: 9999;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .detail-page.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .close-btn {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30,30,30,0.9);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10000;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .close-btn:hover {
+            background: rgba(0,0,0,0.95);
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .detail-content {
+            display: none;
+        }
+
+        .detail-content.active {
+            display: block;
+        }
+
+        /* 涨乐财付通详情样式 */
+        .case-study-section {
+            width: 100%;
+            background: #f5f5f5;
+            padding: 60px 5% 0;
+            position: relative;
+        }
+
+        .case-study-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 30px;
+        }
+
+        .case-study-item {
+            display: grid;
+            grid-template-columns: 480px 1fr;
+            gap: 80px;
+            margin-bottom: 120px;
+            align-items: start;
+        }
+
+        .case-study-left {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            margin-top: -30px;
+            padding-right: 40px;
+        }
+
+        .phone-mockup-1 {
+            width: 383px;
+            height: 594px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .phone-mockup-2 {
+            width: 501px;
+            height: 594px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .side-labels-1 {
+            position: absolute;
+            left: -60px;
+            top: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 105px;
+        }
+
+        .side-label-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 4px;
+        }
+
+        .side-icon {
+            font-size: 29px;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .side-text-main {
+            font-size: 20px;
+            font-weight: 500;
+            color: #262B35;
+            line-height: 1.2;
+        }
+
+        .side-text-sub {
+            font-size: 20px;
+            font-weight: 300;
+            color: #262B35;
+            line-height: 1.2;
+        }
+
+        .side-labels-2 {
+            position: absolute;
+            left: -100px;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .label-tool {
+            background: transparent;
+            padding: 0;
+            font-size: 20px;
+            color: #262B35;
+            font-weight: 300;
+            position: absolute;
+            left: -40px;
+            top: 108px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .label-ad {
+            background: transparent;
+            padding: 0;
+            font-size: 20px;
+            color: #262B35;
+            font-weight: 300;
+            position: absolute;
+            left: -40px;
+            top: 200px;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .case-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .case-title {
+            font-size: 46px;
+            font-weight: 600;
+            color: #262B35;
+            letter-spacing: -0.5px;
+        }
+
+        .case-badge {
+            background: #30A1F8;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 22px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(48, 161, 248, 0.3);
+        }
+
+        .subtitle-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .case-subtitle {
+            font-size: 37px;
+            font-weight: 300;
+            color: #262B35;
+            line-height: 1.4;
+            position: relative;
+            z-index: 2;
+        }
+
+        .gradient-bar {
+            position: absolute;
+            left: 0;
+            bottom: calc(1.4em + 33px);
+            width: 503px;
+            height: 18px;
+            background: linear-gradient(to right, #B5DAF6 0%, transparent 100%);
+            z-index: 1;
+        }
+
+        .case-content {
+            font-size: 19.8px;
+            font-weight: 300;
+            line-height: 1.5;
+            color: #5B616C;
+            margin-top: 16px;
+            max-width: 503px;
+        }
+
+        .case-content p { margin-bottom: 22px; }
+        .case-content strong { font-weight: 500; color: #262B35; }
+        .highlight-data { font-weight: 500; color: #262B35; }
+
+        /* GSAP展示区域 */
+        .gsap-showcase {
+            width: 100%;
+            background: #f5f5f5;
+            position: relative;
+            margin-top: 40px;
+            padding-bottom: 50px;
+            height: auto; min-height: calc(200vh - 400px);
+        }
+
+        .scene {
+            position: relative;
+            height: 350px;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10vh;
+        }
+
+        #scene1 .phone {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            width: 280px;
+            margin-left: -140px;
+            transform-origin: bottom center;
+            will-change: transform;
+        }
+
+        #scene2 .phone {
+            position: absolute;
+            bottom: -190px;
+            left: 50%;
+            width: 392px;
+            margin-left: -196px;
+            transform-origin: bottom center;
+            will-change: transform;
+        }
+
+        #scene1 .phone img, #scene2 .phone img {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.15));
+        }
+
+        #scene2 .phone img { aspect-ratio: 577/764; object-fit: cover; }
+
+        .phone-center { z-index: 3; }
+        .phone-left { z-index: 2; }
+        .phone-right { z-index: 1; }
+
+        #scene1 .caption {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #1d1d1f;
+            font-size: 20px;
+            line-height: 1.6;
+            width: 95%;
+            max-width: 650px;
+            padding: 16px 24px;
+            z-index: 10;
+            background: rgba(200, 200, 200, 0.3);
+            backdrop-filter: blur(12px);
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        #scene2 .caption {
+            position: absolute;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #1d1d1f;
+            font-size: 20px;
+            line-height: 1.6;
+            width: 90%;
+            max-width: 600px;
+            padding: 16px 24px;
+            z-index: 10;
+            background: rgba(200, 200, 200, 0.3);
+            backdrop-filter: blur(12px);
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* 江苏银行样式 */
+        .js-bank-hero {
+            background: #2B6AFF;
+            color: white;
+            min-height: 80vh;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .js-bank-hero-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 5%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .js-bank-hero-text {
+            position: relative;
+            z-index: 3;
+        }
+
+        .js-bank-watermark {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            font-size: 18px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            font-weight: 400;
+            z-index: 10;
+        }
+
+        .js-bank-title {
+            font-size: 93px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: 6px;
+            line-height: 1.1;
+        }
+
+        .js-bank-subtitle {
+            font-size: 44px;
+            font-weight: 300;
+            letter-spacing: 8px;
+            opacity: 0.95;
+        }
+
+        .js-bank-white-block {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 20%;
+            background: white;
+            clip-path: none;
+            z-index: 1;
+        }
+
+        .js-bank-hero-img {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 3;
+        }
+
+        .js-bank-hero-img img {
+            max-height: 595px;
+            width: auto;
+            filter: drop-shadow(0 25px 50px rgba(0,0,0,0.2));
+        }
+
+        .js-bank-concept {
+            background: white;
+            padding: 120px 5%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .js-bank-concept-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .js-bank-concept-header {
+            position: absolute;
+            top: 60px;
+            left: 5%;
+            font-size: 18px;
+            color: #999;
+            letter-spacing: 2px;
+            font-weight: 400;
+        }
+
+        .js-bank-concept-text h2 {
+            font-size: 37px;
+            color: #1a1a1a;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-weight: 700;
+        }
+
+        .js-bank-concept-text p {
+            font-size: 22px;
+            line-height: 2;
+            color: #aaa;
+            margin-bottom: 24px;
+            font-weight: 300;
+        }
+
+        .js-bank-concept-text strong {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .js-bank-concept-img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .js-bank-concept-img img {
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+
+        .js-bank-section-3 {
+            background: #fafafa;
+            padding: 120px 5%;
+            overflow: hidden;
+        }
+
+        .js-bank-section-3-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .js-bank-section-3-images {
+            display: flex;
+            gap: 24px;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        .js-bank-section-3-img {
+            width: 260px;
+            flex-shrink: 0;
+        }
+
+        .js-bank-section-3-img:first-child img {
+            transform: scale(1.7);
+            transform-origin: top center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .js-bank-section-3-img img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 12px 30px rgba(0,0,0,0.12));
+        }
+
+        .js-bank-section-3-text h2 {
+            font-size: 37px;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            font-weight: 700;
+        }
+
+        .js-bank-section-3-text p {
+            font-size: 22px;
+            line-height: 1.9;
+            color: #aaa;
+            font-weight: 300;
+        }
+
+        .js-bank-section-4 {
+            background: white;
+            padding: 120px 5%;
+            overflow: hidden;
+        }
+
+        .js-bank-section-4-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .js-bank-section-4-text {
+            order: 1;
+        }
+
+        .js-bank-section-4-images {
+            order: 2;
+            display: flex;
+            gap: 24px;
+            justify-content: flex-end;
+        }
+
+        .js-bank-section-4-img {
+            width: 260px;
+            flex-shrink: 0;
+        }
+
+        .js-bank-section-4-img img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 12px 30px rgba(0,0,0,0.12));
+        }
+
+        .js-bank-section-4-text h2 {
+            font-size: 37px;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            font-weight: 700;
+        }
+
+        .js-bank-section-4-text p {
+            font-size: 22px;
+            line-height: 1.9;
+            color: #aaa;
+            font-weight: 300;
+        }
+
+        .animate-text {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        /* 响应式 */
+        @media (max-width: 1100px) {
+            .case-study-item { grid-template-columns: 1fr; gap: 40px; }
+            .case-study-left { justify-content: center; padding-left: 80px; padding-right: 0; margin-top: 0; }
+            .gradient-bar { width: 100%; max-width: 503px; }
+
+            #scene1 .phone { width: 200px; margin-left: -100px; bottom: 280px; }
+            #scene2 .phone { width: 280px; margin-left: -140px; bottom: -190px; }
+            #scene1 .caption { bottom: 160px; font-size: 20px; }
+            #scene2 .caption { bottom: -100px; font-size: 20px; }
+
+            .js-bank-hero-inner { grid-template-columns: 1fr; text-align: center; }
+            .js-bank-title { font-size: 84px; }
+            .js-bank-subtitle { font-size: 34px; }
+            .js-bank-white-block { width: 100%; height: 20%; clip-path: none; }
+            .js-bank-hero-img img { max-height: 450px; }
+
+            .js-bank-concept-inner,
+            .js-bank-section-3-inner,
+            .js-bank-section-4-inner { grid-template-columns: 1fr; gap: 60px; }
+
+            .js-bank-section-4-text { order: 2; }
+            .js-bank-section-4-images { order: 1; justify-content: center; }
+
+            .js-bank-section-3-images,
+            .js-bank-section-4-images { justify-content: center; flex-wrap: wrap; }
+            
+            .js-bank-section-3-img:first-child img {
+                transform: scale(1.3);
+                margin-bottom: 100px;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .portfolio-container { grid-template-columns: repeat(2, 1fr); }
+            .experience-item {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .experience-item::before {
+                display: none;
+            }
+            .exp-right {
+                padding-left: 0;
+            }
+            .nav {
+                gap: 24px;
+                padding: 12px 24px;
+            }
+            .nav a {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .js-bank-title { font-size: 63px; }
+            .js-bank-subtitle { font-size: 26px; }
+            .js-bank-section-3-img,
+            .js-bank-section-4-img { width: 220px; }
+            
+            .js-bank-hero-img img { max-height: 380px; }
+            
+            .js-bank-section-3-img:first-child img {
+                transform: scale(1.2);
+                margin-bottom: 60px;
+            }
+            .portfolio-container { grid-template-columns: 1fr; }
+            .job-title { font-size: 32px; }
+            .name-text { font-size: 60px; }
+            .portrait-main {
+                height: 50vh;
+                opacity: 0.6;
+            }
+            #animation {
+                width: 100%;
+                height: 400px;
+            }
+            .portfolio-contact-inner {
+                padding: 20px;
+            }
+            .portfolio-contact-inner .connect-row {
+                font-size: 18px;
+            }
+            .portfolio-contact-inner .connect-value {
+                font-size: 16px;
+                min-width: 200px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .portfolio-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航 -->
+    <nav class="nav">
+        <a href="#home">Home</a>
+        <a href="#work">Work</a>
+        <a href="#story">Story</a>
+        <a href="#portfolio">Portfolio</a>
+        <a onclick="openConnectModal()" style="cursor: pointer;">Connect</a>
+    </nav>
+
+    <!-- Connect 弹窗（自适应尺寸，非全屏） -->
+    <div class="connect-modal" id="connectModal" onclick="closeConnectModal(event)">
+        <div class="connect-content" onclick="event.stopPropagation()">
+            <button class="connect-close" onclick="closeConnectModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <div class="connect-row">
+                <div class="connect-label">E-mail</div>
+                <div class="connect-value" id="emailValue">mu4210@126.com</div>
+                <button class="connect-copy" onclick="copyToClipboard('mu4210@126.com', this)">Copy</button>
+            </div>
+            
+            <div class="connect-row">
+                <div class="connect-label">Phone/wechat</div>
+                <div class="connect-value" id="phoneValue">18913966889</div>
+                <button class="connect-copy" onclick="copyToClipboard('18913966889', this)">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Hero / 个人简介 ===== -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="greeting">
+                <span class="wave">👋</span>
+                <span>Nice to meet you, I'm</span>
+            </div>
+
+            <div class="name-wrapper">
+                <div class="layer-black">
+                    <div class="name-text line-joey-black">JOEY</div>
+                    <div class="name-text line-zhang-black">ZHANG</div>
+                </div>
+                
+                <img src="./joey-portrait.png" 
+                     alt="Joey Zhang" 
+                     class="portrait-main" 
+                     id="parallax-img">
+                
+                <div class="layer-outline">
+                    <div class="name-text line-joey-outline">JOEY</div>
+                    <div class="name-text line-zhang-outline">ZHANG</div>
+                </div>
+            </div>
+
+            <div class="role">UI/UX designer. based in NanJing</div>
+        </div>
+    </section>
+
+    <!-- ===== Lottie 动画区 ===== -->
+    <section class="work-section" id="work">
+        <div id="animation-wrapper">
+            <div id="animation"></div>
+        </div>
+    </section>
+
+    <!-- ===== 工作经历 ===== -->
+    <section class="experience-section" id="story">
+        <div class="experience-container">
+            <h2 class="section-title">EXPERIENCE</h2>
+
+            <!-- 宝马 -->
+            <div class="experience-item">
+                <div class="exp-left">
+                    <div class="company-header">
+                        <span class="company-name">宝马（澄迈）</span> | 
+                        <span class="exp-date">2023.11 - 至今</span>
+                    </div>
+                    <div class="job-title">UIUX<br>设计师</div>
+                </div>
+                <div class="exp-right">
+                    <p><strong>智能主动推荐系统（IPA Intellect）交互设计</strong></p>
+                    <ul class="exp-list">
+                        <li>主导智能助手主动推荐功能的交互设计，搭建用户意图预测与信息触发的交互逻辑，平衡系统主动性与用户控制感</li>
+                        <li><strong>跨地域协作：</strong>对接德国总部设计规范与本土技术实现，确保BMW品牌体验一致性和落地的完整度</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 福特汽车 -->
+            <div class="experience-item">
+                <div class="exp-left">
+                    <div class="company-header">
+                        <span class="company-name">福特汽车（中国）</span> | 
+                        <span class="exp-date">2021.02 - 2023.07</span>
+                    </div>
+                    <div class="job-title">整车体验设计 /<br>HMI设计负责人</div>
+                </div>
+                <div class="exp-right">
+                    <p><strong>整车级产品定义 + 高层战略汇报 + 量产HMI交付</strong></p>
+                    
+                    <span class="exp-subtitle">整车产品策划</span>
+                    <ul class="exp-list">
+                        <li>建立整车维度用户体验地图，整合用户画像深度洞察，精准定位<strong>"用户需求×公司能力"</strong>的产品机会交集</li>
+                        <li>主导策划的车型被确立为福特&长安&长福三方未来3年重点项目，直接向高层领导以PPT+3D可视化形式汇报并推动立项</li>
+                    </ul>
+
+                    <span class="exp-subtitle">HMI量产交付</span>
+                    <ul class="exp-list">
+                        <li>主导4款福特/野马车型仪表HMI设计全周期，完成从概念到量产的交付物审查及供应商管理</li>
+                        <li><strong>国际化协作：</strong>以英文与北美造型部门同步设计细节及项目进程，确保设计意图跨文化准确传达</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 的卢汽车 -->
+            <div class="experience-item">
+                <div class="exp-left">
+                    <div class="company-header">
+                        <span class="company-name">的卢汽车</span> | 
+                        <span class="exp-date">2019.03 - 2021.02</span>
+                    </div>
+                    <div class="job-title">全栈设计<br>负责人</div>
+                </div>
+                <div class="exp-right">
+                    <ul class="exp-list">
+                        <li>搭建车载软件视觉设计系统与交互规范体系，主导A0级平台从零搭建（需求文档撰写→交互设计→设计评审→开发宣讲→最终验收）</li>
+                        <li><strong>知识产权：</strong>撰写多篇技术专利及实用新型专利，将设计创新转化为公司资产</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 卓奇设计 -->
+            <div class="experience-item">
+                <div class="exp-left">
+                    <div class="company-header">
+                        <span class="company-name">卓奇设计</span> | 
+                        <span class="exp-date">2015.06 - 2019.03</span>
+                    </div>
+                    <div class="job-title">用户体验<br>团队长</div>
+                </div>
+                <div class="exp-right">
+                    <ul class="exp-list">
+                        <li>操盘华泰证券<strong>"涨乐财富通"</strong>：担任交互+视觉设计负责人，任内保持券商APP用户量第一</li>
+                        <li>在鸟巢等场馆组织多场大型版本发布活动，完成布展及相关汇报材料</li>
+                        <li>负责项目: 昆山银行、泉州银行、 KFC 、安信证券、华泰证券等</li>
+                        <li>与客户沟通，了解并帮助梳理需求，商议所需人工，并负责按时、按质量完成交付</li>
+                    </ul>
+                    <div class="highlight-block">
+                        在任职期间涨乐在券商中的用户量始终排名第一，并获得"最佳功能创新APP""优秀券商APP"等多个奖项
+                    </div>
+                </div>
+            </div>
+
+            <!-- 原力动画 -->
+            <div class="experience-item">
+                <div class="exp-left">
+                    <div class="company-header">
+                        <span class="company-name">原力动画</span> | 
+                        <span class="exp-date">2010.11 - 2014.09</span>
+                    </div>
+                    <div class="job-title">3D游戏<br>美术</div>
+                </div>
+                <div class="exp-right">
+                    <ul class="exp-list">
+                        <li>曾参与过模拟人生4、斗战神、WWE官方游戏及其他包括EA、索尼、世嘉、腾讯、网易等游戏公司的3D美术制作</li>
+                        <li><strong>差异化优势：</strong>具备3D动画/可视化能力，支撑整车汇报中的3D演示及HMI视觉表现力</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ===== 作品集 Portfolio ===== -->
+    <section class="portfolio-section" id="portfolio">
+        <div class="portfolio-header">
+            <h2>PORTFOLIO</h2>
+            <p>精选项目与创作归档</p>
+        </div>
+
+        <div class="portfolio-container" id="portfolioContainer"></div>
+
+        <!-- Portfolio 底部联系页（同 Connect 弹窗样式） -->
+        <div class="portfolio-contact-section">
+            <div class="portfolio-contact-inner">
+                <div class="connect-row">
+                    <div class="connect-label">E-mail</div>
+                    <div class="connect-value">mu4210@126.com</div>
+                    <button class="connect-copy" onclick="copyToClipboard('mu4210@126.com', this)">Copy</button>
+                </div>
+                
+                <div class="connect-row">
+                    <div class="connect-label">Phone/wechat</div>
+                    <div class="connect-value">18913966889</div>
+                    <button class="connect-copy" onclick="copyToClipboard('18913966889', this)">Copy</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 详情页（覆盖层）===== -->
+    <div class="detail-page" id="detailPage">
+        <button class="close-btn" onclick="closeDetail()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            关闭
+        </button>
+
+        <!-- 涨乐财付通详情 -->
+        <div class="detail-content" id="zhangLeContent">
+            <div class="case-study-section">
+                <div class="case-study-container">
+                    <h2 class="section-title animate-text">WORK</h2>
+
+                    <div class="case-study-item">
+                        <div class="case-study-left animate-text" style="transform: translateX(140px);">
+                            <div class="side-labels-1">
+                                <div class="side-label-item">
+                                    <div class="side-icon">🥶</div>
+                                    <div class="side-text-main">广告区</div>
+                                    <div class="side-text-sub">点击率1.2%</div>
+                                </div>
+                                <div class="side-label-item">
+                                    <div class="side-icon">🔥</div>
+                                    <div class="side-text-main">功能区</div>
+                                    <div class="side-text-sub">点击率20%</div>
+                                </div>
+                            </div>
+                            <img src="zhangle1.png" alt="问题定义线框图" class="phone-mockup-1">
+                        </div>
+                        <div class="case-study-right animate-text">
+                            <div class="case-header">
+                                <h3 class="case-title">涨乐财富通</h3>
+                                <span class="case-badge">6.0更新</span>
+                            </div>
+                            <div class="subtitle-wrapper">
+                                <h4 class="case-subtitle">问题定义：首页空间语义失衡<br>—广告侵占与工具下沉</h4>
+                                <div class="gradient-bar"></div>
+                            </div>
+                            <div class="case-content">
+                                <p>金融交易工具的首页，空间语义却呈现"广告平台"属性——顶部视觉焦点被低转化内容占据，而高频交易工具被迫下沉，造成心智认知与操作效率的双重损耗。</p>
+                                <p><strong>视觉层级矛盾：</strong>顶部（视觉第一落点）被Banner占据，传递"这是一个卖广告的App"心智</p>
+                                <p><strong>点击率落差：</strong>顶部Banner点击率仅 <span class="highlight-data">1.2%</span>，而功能入口区达 <span class="highlight-data">20%</span>（16倍差距）</p>
+                                <p><strong>操作效率低：</strong>高频工具（交易、查看资产）被营销内容挤压</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="case-study-item">
+                        <div class="case-study-left animate-text" style="transform: translateX(100px);">
+                            <div class="side-labels-2">
+                                <div class="label-tool">工具属性</div>
+                                <div class="label-ad">动态广告位</div>
+                            </div>
+                            <img src="zhangle2.png" alt="解决方案界面" class="phone-mockup-2">
+                        </div>
+                        <div class="case-study-right animate-text">
+                            <div class="case-header">
+                                <h3 class="case-title">涨乐财富通</h3>
+                                <span class="case-badge">6.0更新</span>
+                            </div>
+                            <div class="subtitle-wrapper">
+                                <h4 class="case-subtitle">解决方案：重构空间叙事<br>——工具优先与场景化渗透</h4>
+                                <div class="gradient-bar"></div>
+                            </div>
+                            <div class="case-content">
+                                <p><strong>顶部归还工具属性：</strong>将功能入口置顶首屏，reclaim 视觉第一落点。用户首览即见核心交易功能，重建"专业金融工具"心智。</p>
+                                <p><strong>中部承接商业转化：</strong>广告从顶部盲区移至信息流第 3-4 位，嵌入自然浏览动线。既落入拇指舒适触控区，又避开 Banner 免疫效应。</p>
+                                <p>广告点击率从顶部盲区的 <span class="highlight-data">1.2%</span> 跃升至信息流 <span class="highlight-data">4.8%</span>（+300%），同时用户调研显示"专业交易工具"品牌认知度提升 <span class="highlight-data">23%</span>。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="gsap-showcase">
+                <div class="scene" id="scene1">
+                    <div class="phone phone-left" data-init-rotate="-6" data-init-x="-30" data-final-rotate="-22" data-final-x="-90">
+                        <img src="image1.png" alt="买卖点分析">
+                    </div>
+                    <div class="phone phone-center" data-init-rotate="0" data-init-x="0" data-final-rotate="0" data-final-x="0">
+                        <img src="image2.png" alt="自选股潜力报告">
+                    </div>
+                    <div class="phone phone-right" data-init-rotate="6" data-init-x="30" data-final-rotate="22" data-final-x="90">
+                        <img src="image3.png" alt="主力风云榜">
+                    </div>
+                    <div class="caption animate-text">
+                        将复杂的金融分析工具转化为直观的可视化语言，降低专业门槛
+                    </div>
+                </div>
+
+                <div class="scene" id="scene2">
+                    <div class="phone phone-left" data-init-rotate="-6" data-init-x="-30" data-final-rotate="-22" data-final-x="-90">
+                        <img src="image21.png" alt="持仓分析1">
+                    </div>
+                    <div class="phone phone-center" data-init-rotate="0" data-init-x="0" data-final-rotate="0" data-final-x="0">
+                        <img src="image22.png" alt="持仓分析2">
+                    </div>
+                    <div class="phone phone-right" data-init-rotate="6" data-init-x="30" data-final-rotate="22" data-final-x="90">
+                        <img src="image23.png" alt="持仓分析3">
+                    </div>
+                    <div class="caption animate-text">
+                        构建沉浸式金融数据专题设计，兼具专业深度与视觉温度。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 江苏银行详情 -->
+        <div class="detail-content" id="jsBankContent">
+            <section class="js-bank-hero">
+                <div class="js-bank-watermark animate-text">ZHANG JUE'S</div>
+                <div class="js-bank-white-block"></div>
+                <div class="js-bank-hero-inner">
+                    <div class="js-bank-hero-text animate-text" style="margin-top: 80px;">
+                        <h1 class="js-bank-title">江苏银行</h1>
+                        <p class="js-bank-subtitle">「献给新中产」</p>
+                    </div>
+                    <div class="js-bank-hero-img animate-text" style="margin-top: 160px;">
+                        <img src="image a-6.png" alt="江苏银行首页">
+                    </div>
+                </div>
+            </section>
+
+            <section class="js-bank-concept">
+                <div class="js-bank-concept-header animate-text">ZHANG JUE'S</div>
+                <div class="js-bank-concept-inner">
+                    <div class="js-bank-concept-text animate-text">
+                        <h2>
+                            银行有很强的专业感，这种专业感反应在视觉上会是<strong>干净的色彩，精致的造型</strong>
+                        </h2>
+                        <p>
+                            中产阶级不仅仅忙碌于生活的温饱，有机会寻求精神的富足、实现自我。这种价值观反映在消费上，通常就是一种对产品品质的追求，是一种审美的体验。能满足这些需求的生产商，则需要将产品变得<strong>更有质感，更人性化和艺术化</strong>。
+                        </p>
+                        <p>
+                            将传统元素部分融入手机银行的现代感中，两者产生奇妙的视觉融合感。文化感带来品牌深度的增强，让增加新中产阶级对品牌的喜爱度以及归属感。增加产品的<strong>质感</strong>，使其更精致美观。
+                        </p>
+                    </div>
+                    <div class="js-bank-concept-img animate-text">
+                        <img src="image a-5.png" alt="新中式设计理念">
+                    </div>
+                </div>
+            </section>
+
+            <section class="js-bank-section-3">
+                <div class="js-bank-section-3-inner">
+                    <div class="js-bank-section-3-images animate-text">
+                        <div class="js-bank-section-3-img">
+                            <img src="image a-1.png" alt="首页设计">
+                        </div>
+                        <div class="js-bank-section-3-img">
+                            <img src="image a-2.png" alt="推荐理财">
+                        </div>
+                    </div>
+                    <div class="js-bank-section-3-text animate-text">
+                        <h2>构建差异化的视觉语言体系</h2>
+                        <p>设计精致微拟物图标，在扁平化基础上融入微妙光影与材质纹理，提升功能识别度与点击欲望；建立涵盖数据展示、信息卡片、操作按钮的全局组件规范，确保跨页面视觉一致性，将专业金融信息转化为直观易读的美学呈现。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="js-bank-section-4">
+                <div class="js-bank-section-4-inner">
+                    <div class="js-bank-section-4-text animate-text">
+                        <h2>融合生活美学与金融场景</h2>
+                        <p>金融页采用场景化卡片与情感化插画，将理财产品以生活化视觉叙事呈现；生活页融入时令节气与地域文化元素，通过有温度的运营设计将工具属性转化为情感连接，在提升用户黏性的同时传递品牌人文关怀。</p>
+                    </div>
+                    <div class="js-bank-section-4-images animate-text">
+                        <div class="js-bank-section-4-img">
+                            <img src="image a-3.png" alt="金融页">
+                        </div>
+                        <div class="js-bank-section-4-img">
+                            <img src="image a-4.png" alt="生活页">
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 福特详情（重构辅助驾驶） -->
+        <div class="detail-content" id="fordContent">
+            <!-- 第一页：白色背景，图片贴底 -->
+            <div style="width: 100%; min-height: 100vh; background: #ffffff; padding: 0; position: relative; overflow-x: hidden; display: flex; flex-direction: column;">
+                <!-- 标题部分 -->
+                <div style="position: relative; z-index: 10; text-align: center; padding: 100px 20px 40px; flex-shrink: 0;">
+                    <div style="position: relative; display: inline-block; margin-bottom: 16px;" class="animate-text">
+                        <h2 style="font-size: 53px; font-weight: 600; color: #1a1a1a; font-family: 'PingFang SC', sans-serif; position: relative; z-index: 2;">重构辅助驾驶设置体验结构</h2>
+                        <div style="position: absolute; left: 0; bottom: 4px; width: 100%; height: 18px; background: linear-gradient(to right, #B5DAF6 0%, transparent 100%); z-index: 1;"></div>
+                    </div>
+                    <p style="font-size: 42px; color: #333; font-weight: 400; margin-top: 16px;" class="animate-text">从"系统逻辑"到"用户认知"</p>
+                </div>
+
+                <!-- 图片区域：margin-top: auto 贴底 -->
+                <div style="width: 100%; margin-top: auto; opacity: 0.9; line-height: 0;" class="animate-text">
+                    <img src="adas.png" alt="福特sync+辅助驾驶重构" style="width: 100%; height: auto; display: block; vertical-align: bottom;">
+                </div>
+            </div>
+
+            <!-- 第二页：黑色背景内容 -->
+            <div style="width: 100%; min-height: 100vh; background: #231F20; position: relative; overflow: hidden;">
+                <div style="position: absolute; right: 0; top: 0; width: 100%; height: 100%; overflow: hidden;">
+                    <div style="position: absolute; right: -10%; top: 50%; transform: translateY(-50%) scale(0.9); transform-origin: right center; z-index: 1;">
+                        <img src="sync+.png" alt="福特SYNC+仪表" style="height: 90vh; width: auto; max-width: none; opacity: 0.9;">
+                    </div>
+                    <div style="position: absolute; top: 0; left: 0; width: 65%; height: 100%; background: linear-gradient(to right, rgba(35,31,32,1) 0%, rgba(35,31,32,0.9) 30%, rgba(35,31,32,0.5) 60%, rgba(35,31,32,0) 100%); z-index: 2; pointer-events: none;"></div>
+                </div>
+
+                <div style="position: relative; z-index: 4; max-width: 1200px; margin: 0 auto; padding: 100px 5%; min-height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="position: relative; display: inline-block; margin-bottom: 50px;" class="animate-text">
+                        <h2 style="font-size: 55px; font-weight: 700; color: #ffffff; position: relative; z-index: 2; letter-spacing: 1px;">福特 SYNC+ 仪表交付保障</h2>
+                        <div style="position: absolute; left: 0; bottom: 4px; width: 550px; height: 18px; background: linear-gradient(to right, #0091FF 0%, rgba(0,145,255,0.3) 60%, transparent 100%); z-index: 1;"></div>
+                    </div>
+
+                    <p style="font-size: 23px; line-height: 1.8; color: #B8B8B8; margin-bottom: 50px; max-width: 780px; font-weight: 300; font-family: 'PingFang SC', sans-serif;" class="animate-text">
+                        作为global HMI仪表设计与本地工程团队的UX接口人，负责确保福特全球仪表交互设计（BlueCruise/ACC/LKS/RTT等）在中国车型中落地。
+                    </p>
+
+                    <div style="margin-bottom: 50px; max-width: 850px;" class="animate-text">
+                        <h3 style="font-size: 26px; font-weight: 600; color: #ffffff; margin-bottom: 28px; font-family: 'PingFang SC', sans-serif;">核心工作：</h3>
+
+                        <div style="margin-bottom: 22px;">
+                            <p style="font-size: 22px; line-height: 1.7; color: #B8B8B8; font-weight: 300; font-family: 'PingFang SC', sans-serif;">
+                                <span style="display: inline-block; width: 12px; height: 12px; background: #ffffff; border-radius: 50%; margin-right: 12px; vertical-align: middle; margin-top: -3px;"></span>
+                                <span style="color: #ffffff; font-weight: 400;">设计意图转译：</span>
+                                将global团队的交互逻辑转化为本地开发可理解中英双语的技术文档，消除跨文化理解偏差。
+                            </p>
+                        </div>
+
+                        <div style="margin-bottom: 22px;">
+                            <p style="font-size: 22px; line-height: 1.7; color: #B8B8B8; font-weight: 300; font-family: 'PingFang SC', sans-serif;">
+                                <span style="display: inline-block; width: 12px; height: 12px; background: #ffffff; border-radius: 50%; margin-right: 12px; vertical-align: middle; margin-top: -3px;"></span>
+                                <span style="color: #ffffff; font-weight: 400;">实现质量走查：</span>
+                                建立设计-开发走查机制，在实车测试阶段识别并推动修正偏差，确保量产车型与全球设计规范一致。
+                            </p>
+                        </div>
+
+                        <div>
+                            <p style="font-size: 22px; line-height: 1.7; color: #B8B8B8; font-weight: 300; font-family: 'PingFang SC', sans-serif;">
+                                <span style="display: inline-block; width: 12px; height: 12px; background: #ffffff; border-radius: 50%; margin-right: 12px; vertical-align: middle; margin-top: -3px;"></span>
+                                <span style="color: #ffffff; font-weight: 400;">交付流程优化：</span>
+                                搭建Jira设计问题追踪流程，将设计-开发沟通回合从平均5轮降至2轮，缩短ADAS功能交付周期30%。
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="max-width: 850px;" class="animate-text">
+                        <h3 style="font-size: 26px; font-weight: 600; color: #ffffff; margin-bottom: 16px; font-family: 'PingFang SC', sans-serif;">交付成果：</h3>
+                        <p style="font-size: 22px; line-height: 1.7; color: #B8B8B8; font-weight: 300; font-family: 'PingFang SC', sans-serif;">
+                            支持福克斯/探险者/Mustang Mach-E等X款车型的SYNC+ ADAS仪表功能落地，用户验收测试（UAT）一次性通过率98%。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D详情 -->
+        <div class="detail-content" id="3dContent" style="font-family: 'PingFang SC', sans-serif; font-weight: 300;">
+            <div style="width: 100%; min-height: 100vh; background: #f5f5f5; padding: 80px 5%;">
+                <div style="max-width: 1400px; margin: 0 auto;">
+                    <h2 style="font-size: 53px; font-weight: 600; color: #1a1a1a; margin-bottom: 60px; text-align: center; font-family: 'PingFang SC', sans-serif;" class="animate-text">3D建模 & 渲染</h2>
+
+                    <div style="display: flex; flex-direction: column; gap: 60px; align-items: center;">
+                        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 1000px;" class="animate-text">
+                            <img src="image d-1.png" alt="概念车外观氛围片" style="width: 100%; height: auto; object-fit: contain; display: block; max-height: 80vh;">
+                            <div style="padding: 24px; text-align: center;">
+                                <p style="font-size: 20px; color: #666; font-weight: 300; font-family: 'PingFang SC', sans-serif;">概念车外观氛围片</p>
+                            </div>
+                        </div>
+
+                        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 1000px;" class="animate-text">
+                            <img src="image d-2.png" alt="场景化渲染呈现"移动生活空间"概念" style="width: 100%; height: auto; object-fit: contain; display: block; max-height: 80vh;">
+                            <div style="padding: 24px; text-align: center;">
+                                <p style="font-size: 20px; color: #666; font-weight: 300; font-family: 'PingFang SC', sans-serif;">场景化渲染呈现"移动生活空间"概念</p>
+                            </div>
+                        </div>
+
+                        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 1000px;" class="animate-text">
+                            <img src="image d-3.png" alt="顶视角展示天窗遮阳系统" style="width: 100%; height: auto; object-fit: contain; display: block; max-height: 80vh;">
+                            <div style="padding: 24px; text-align: center;">
+                                <p style="font-size: 20px; color: #666; font-weight: 300; font-family: 'PingFang SC', sans-serif;">顶视角展示天窗遮阳系统</p>
+                            </div>
+                        </div>
+
+                        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 1000px;" class="animate-text">
+                            <img src="image d-4.png" alt="游戏遗迹场景3D 建模贴图" style="width: 100%; height: auto; object-fit: contain; display: block; max-height: 80vh;">
+                            <div style="padding: 24px; text-align: center;">
+                                <p style="font-size: 20px; color: #666; font-weight: 300; font-family: 'PingFang SC', sans-serif;">游戏遗迹场景3D 建模贴图</p>
+                            </div>
+                        </div>
+
+                        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 1000px;" class="animate-text">
+                            <img src="image d-5.png" alt="硬表面高模制作与贴图绘制" style="width: 100%; height: auto; object-fit: contain; display: block; max-height: 80vh;">
+                            <div style="padding: 24px; text-align: center;">
+                                <p style="font-size: 20px; color: #666; font-weight: 300; font-family: 'PingFang SC', sans-serif;">硬表面高模制作与贴图绘制</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 其他详情 -->
+        <div class="detail-content" id="othersContent" style="font-family: 'PingFang SC', sans-serif; font-weight: 300;">
+            <div style="width: 100%; min-height: 100vh; background: #f5f5f5; padding: 80px 5%;">
+                <div style="max-width: 1400px; margin: 0 auto;">
+                    <h2 style="font-size: 53px; font-weight: 600; color: #1a1a1a; margin-bottom: 60px; text-align: center; font-family: 'PingFang SC', sans-serif;" class="animate-text">其他设计探索</h2>
+
+                    <div style="display: flex; flex-direction: column; gap: 60px; align-items: center;">
+                        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 1000px;" class="animate-text">
+                            <img src="image e-1.png" alt="金融数据可视化" style="width: 100%; height: auto; object-fit: contain; display: block; max-height: 80vh;">
+                            <div style="padding: 24px; text-align: center;">
+                                <p style="font-size: 20px; color: #666; font-weight: 300; font-family: 'PingFang SC', sans-serif;">将复杂金融数据转化为舞台级可视化叙事</p>
+                            </div>
+                        </div>
+
+                        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 1000px;" class="animate-text">
+                            <img src="image e-2.png" alt="服务蓝图可视化" style="width: 100%; height: auto; object-fit: contain; display: block; max-height: 80vh;">
+                            <div style="padding: 24px; text-align: center;">
+                                <p style="font-size: 20px; color: #666; font-weight: 300; font-family: 'PingFang SC', sans-serif;">梳理跨部门服务触点，用可视化蓝图识别痛点</p>
+                            </div>
+                        </div>
+
+                        <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 1000px;" class="animate-text">
+                            <img src="image e-3.png" alt="手绘练习" style="width: 100%; height: auto; object-fit: contain; display: block; max-height: 80vh;">
+                            <div style="padding: 24px; text-align: center;">
+                                <p style="font-size: 20px; color: #666; font-weight: 300; font-family: 'PingFang SC', sans-serif;">基础手绘练习</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 更多 -->
+        <div class="detail-content" id="moreContent">
+            <div style="width: 100%; min-height: 100vh; background: #f5f5f5; display: flex; align-items: center; justify-content: center; padding: 40px;">
+                <div style="text-align: center;" class="animate-text">
+                    <p style="font-size: 24px; color: #888; font-weight: 300; font-family: 'PingFang SC', sans-serif;">龟速补充ing 🐢</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== Connect 弹窗功能 =====
+        function openConnectModal() {
+            const modal = document.getElementById('connectModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeConnectModal(event) {
+            // 如果点击的是背景（modal本身）或关闭按钮，则关闭
+            if (!event || event.target.id === 'connectModal' || event.target.closest('.connect-close')) {
+                const modal = document.getElementById('connectModal');
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                
+                // 重置所有copy按钮状态
+                document.querySelectorAll('.connect-copy').forEach(btn => {
+                    btn.classList.remove('copied');
+                    btn.textContent = 'Copy';
+                });
+            }
+        }
+
+        async function copyToClipboard(text, btn) {
+            try {
+                await navigator.clipboard.writeText(text);
+                
+                // 视觉反馈
+                btn.classList.add('copied');
+                btn.textContent = 'Copied!';
+                
+                // 2秒后恢复
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.textContent = 'Copy';
+                }, 2000);
+                
+            } catch (err) {
+                // 降级方案
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    btn.classList.add('copied');
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.textContent = 'Copy';
+                    }, 2000);
+                } catch (e) {
+                    console.error('复制失败:', e);
+                }
+                
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // ===== 鼠标视差效果 =====
+        const img = document.getElementById('parallax-img');
+        const hero = document.querySelector('.hero');
+        
+        if (img && hero) {
+            hero.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 15;
+                const y = (e.clientY / window.innerHeight - 0.5) * 15;
+                img.style.transform = `translateY(calc(-50% + ${y}px)) translateX(${x}px)`;
+            });
+            
+            hero.addEventListener('mouseleave', () => {
+                img.style.transform = `translateY(-50%) translateX(0)`;
+            });
+        }
+
+        // ===== Lottie 滚动驱动动画 =====
+        const container = document.getElementById('animation');
+        const wrapper = document.getElementById('animation-wrapper');
+
+        if (container && wrapper) {
+            let animation;
+            try {
+                animation = lottie.loadAnimation({
+                    container: container,
+                    renderer: 'svg',
+                    loop: false,
+                    autoplay: false,
+                    path: 'animation.json'
+                });
+
+                animation.stop();
+                let totalFrames = 0;
+
+                animation.addEventListener('DOMLoaded', () => {
+                    totalFrames = animation.totalFrames;
+                });
+
+                let ticking = false;
+                window.addEventListener('scroll', () => {
+                    if (!ticking) {
+                        window.requestAnimationFrame(() => {
+                            updateAnimationFrame();
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                });
+
+                function updateAnimationFrame() {
+                    if (totalFrames === 0 || !animation) return;
+
+                    const rect = wrapper.getBoundingClientRect();
+                    const windowHeight = window.innerHeight;
+                    
+                    const startOffset = windowHeight * (2 / 3);
+                    const scrollLength = rect.height + windowHeight - startOffset;
+
+                    let scrollPercent = (startOffset - rect.top) / scrollLength;
+                    scrollPercent = Math.min(Math.max(scrollPercent, 0), 1);
+
+                    const frame = scrollPercent * totalFrames;
+                    animation.goToAndStop(frame, true);
+                }
+
+            } catch (e) {
+                console.error('Lottie animation failed to load:', e);
+                container.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:#999;">Please add animation.json file</div>';
+            }
+        }
+
+        // ===== 作品集数据与交互 =====
+        const projects = [
+            {
+                name: "涨乐财付通",
+                tag: "Finance App",
+                desc: "涨乐财付通金融理财类App设计项目。",
+                id: "zhangle",
+                images: [
+                    { file: "image aa-1.png", title: "买卖点分析" },
+                    { file: "image aa-2.png", title: "自选股潜力报告" },
+                    { file: "image aa-3.png", title: "主力风云榜" },
+                    { file: "image aa-4.png", title: "持仓分析1" },
+                    { file: "image aa-5.png", title: "持仓分析2" },
+                    { file: "image aa-6.png", title: "持仓分析3" }
+                ]
+            },
+            {
+                name: "江苏银行",
+                tag: "Banking",
+                desc: "江苏银行移动端银行App redesign项目。",
+                id: "jiangsu",
+                images: [
+                    { file: "image a-1.png", title: "首页设计" },
+                    { file: "image a-2.png", title: "转账流程" },
+                    { file: "image a-3.png", title: "理财专区" },
+                    { file: "image a-4.png", title: "账户管理" },
+                    { file: "image a-5.png", title: "活动页面" },
+                    { file: "image a-6.png", title: "设置界面" }
+                ]
+            },
+            {
+                name: "福特sync+",
+                tag: "HMI Design",
+                desc: "重构辅助驾驶设置体验结构，从系统逻辑到用户认知。",
+                id: "kfc",
+                images: [
+                    { file: "adas-1.png", title: "辅助驾驶设置" },
+                    { file: "sync.png", title: "仪表交付" }
+                ]
+            },
+            {
+                name: "3D建模&渲染",
+                tag: "3D Design",
+                desc: "个人3D建模与渲染练习作品。",
+                id: "3d",
+                images: [
+                    { file: "image d-1.png", title: "产品渲染 1" },
+                    { file: "image d-2.png", title: "产品渲染 2" },
+                    { file: "image d-3.png", title: "场景建模" },
+                    { file: "image d-4.png", title: "材质研究" },
+                    { file: "image d-5.png", title: "光影练习" }
+                ]
+            },
+            {
+                name: "其他",
+                tag: "Miscellaneous",
+                desc: "其他未归类的设计探索。",
+                id: "others",
+                images: [
+                    { file: "image e-1.png", title: "金融数据可视化" },
+                    { file: "image e-2.png", title: "服务蓝图可视化" },
+                    { file: "image e-3.png", title: "手绘练习" }
+                ]
+            },
+            {
+                name: "更多案例",
+                tag: "Coming Soon",
+                desc: "龟速补充ing",
+                id: "more",
+                images: [],
+                isTextOnly: true
+            }
+        ];
+
+        function getSpreadAngles(count) {
+            if (count === 1) return [0];
+            if (count === 2) return [-12, 12];
+            if (count === 3) return [-16, 0, 16];
+            if (count === 4) return [-20, -6, 6, 20];
+            if (count === 5) return [-24, -12, 0, 12, 24];
+            return [-28, -16, -4, 8, 20, 32];
+        }
+
+        const portfolioContainer = document.getElementById('portfolioContainer');
+        let currentProject = null;
+        let gsapInitialized = false;
+        let jsBankGsapInitialized = false;
+        let fordGsapInitialized = false;
+        let content3dGsapInitialized = false;
+        let othersGsapInitialized = false;
+
+        if (portfolioContainer) {
+            projects.forEach((proj, idx) => {
+                const spreadAngles = getSpreadAngles(proj.images.length || 1);
+                const div = document.createElement('div');
+                div.className = 'category';
+
+                if (proj.isTextOnly) {
+                    div.innerHTML = `<div class="category-label">${proj.name}</div><div style="width: 220px; height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;"><p style="color: #888; font-size: 18px; font-weight: 300; font-family: 'PingFang SC', sans-serif;">${proj.desc} 🐢</p></div>`;
+                    div.style.cursor = 'default';
+                    portfolioContainer.appendChild(div);
+                    return;
+                }
+
+                const cardStates = proj.images.map((img, i) => {
+                    const baseRot = ((Math.random() - 0.5) * 4).toFixed(2);
+                    const baseY = i * 2;
+                    const spreadAngle = spreadAngles[i];
+                    const spreadX = (Math.sin(spreadAngle * Math.PI / 180) * 85).toFixed(2);
+                    const zIndex = proj.images.length - i;
+
+                    return {
+                        img: img,
+                        baseRot: baseRot,
+                        baseY: baseY,
+                        spreadAngle: spreadAngle,
+                        spreadX: spreadX,
+                        spreadY: -8,
+                        zIndex: zIndex
+                    };
+                });
+
+                let cardsHtml = '';
+                cardStates.forEach((state, i) => {
+                    const imgSrc = state.img.file ? state.img.file : '';
+                    const placeholder = state.img.title || '图片';
+                    cardsHtml += `
+                        <div class="card" 
+                             data-base-rot="${state.baseRot}" 
+                             data-base-y="${state.baseY}"
+                             data-spread-angle="${state.spreadAngle}"
+                             data-spread-x="${state.spreadX}"
+                             data-spread-y="${state.spreadY}"
+                             data-z="${state.zIndex}"
+                             style="transform: rotate(${state.baseRot}deg) translateY(${state.baseY}px); z-index: ${state.zIndex};">
+                            ${imgSrc ? `<img src="${imgSrc}" alt="${state.img.title}" onerror="this.parentElement.innerHTML='<div class=placeholder>${placeholder}</div>'">` : `<div class="placeholder">${placeholder}</div>`}
+                        </div>
+                    `;
+                });
+
+                div.innerHTML = `<div class="category-label">${proj.name}</div><div class="card-stack">${cardsHtml}</div>`;
+                portfolioContainer.appendChild(div);
+
+                const cards = div.querySelectorAll('.card');
+                const totalCards = cards.length;
+
+                div.addEventListener('mouseenter', () => {
+                    cards.forEach((card, i) => {
+                        const angle = card.dataset.spreadAngle;
+                        const x = card.dataset.spreadX;
+                        const y = card.dataset.spreadY;
+                        const zIndex = 10 + (totalCards - i);
+                        card.style.transform = `rotate(${angle}deg) translateX(${x}px) translateY(${y}px)`;
+                        card.style.zIndex = zIndex;
+                    });
+                });
+
+                div.addEventListener('mouseleave', () => {
+                    cards.forEach((card) => {
+                        const rot = card.dataset.baseRot;
+                        const y = card.dataset.baseY;
+                        const z = card.dataset.z;
+                        card.style.transform = `rotate(${rot}deg) translateY(${y}px)`;
+                        card.style.zIndex = z;
+                    });
+                });
+
+                div.addEventListener('click', () => {
+                    if (proj.id !== 'more') {
+                        openDetail(proj.id);
+                    }
+                });
+            });
+        }
+
+        function openDetail(projectId) {
+            currentProject = projectId;
+            document.getElementById('detailPage').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('detailPage').scrollTop = 0;
+
+            document.getElementById('zhangLeContent').classList.remove('active');
+            document.getElementById('jsBankContent').classList.remove('active');
+            document.getElementById('fordContent').classList.remove('active');
+            document.getElementById('3dContent').classList.remove('active');
+            document.getElementById('othersContent').classList.remove('active');
+            document.getElementById('moreContent').classList.remove('active');
+
+            if (projectId === 'zhangle') {
+                document.getElementById('zhangLeContent').classList.add('active');
+                if (!gsapInitialized) {
+                    initGsapAnimations();
+                    gsapInitialized = true;
+                }
+                setTimeout(() => initScrollAnimations('zhangLeContent'), 100);
+                ScrollTrigger.refresh();
+            } else if (projectId === 'jiangsu') {
+                document.getElementById('jsBankContent').classList.add('active');
+                if (!jsBankGsapInitialized) {
+                    setTimeout(() => {
+                        initJsBankGsapAnimations();
+                        jsBankGsapInitialized = true;
+                    }, 100);
+                } else {
+                    setTimeout(() => initScrollAnimations('jsBankContent'), 100);
+                }
+                ScrollTrigger.refresh();
+            } else if (projectId === 'kfc') {
+                document.getElementById('fordContent').classList.add('active');
+                if (!fordGsapInitialized) {
+                    setTimeout(() => {
+                        initFordGsapAnimations();
+                        fordGsapInitialized = true;
+                    }, 100);
+                } else {
+                    setTimeout(() => initScrollAnimations('fordContent'), 100);
+                }
+                ScrollTrigger.refresh();
+            } else if (projectId === '3d') {
+                document.getElementById('3dContent').classList.add('active');
+                if (!content3dGsapInitialized) {
+                    setTimeout(() => {
+                        init3dGsapAnimations();
+                        content3dGsapInitialized = true;
+                    }, 100);
+                } else {
+                    setTimeout(() => initScrollAnimations('3dContent'), 100);
+                }
+                ScrollTrigger.refresh();
+            } else if (projectId === 'others') {
+                document.getElementById('othersContent').classList.add('active');
+                if (!othersGsapInitialized) {
+                    setTimeout(() => {
+                        initOthersGsapAnimations();
+                        othersGsapInitialized = true;
+                    }, 100);
+                } else {
+                    setTimeout(() => initScrollAnimations('othersContent'), 100);
+                }
+                ScrollTrigger.refresh();
+            }
+        }
+
+        function closeDetail() {
+            document.getElementById('detailPage').classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                document.getElementById('zhangLeContent').classList.remove('active');
+                document.getElementById('jsBankContent').classList.remove('active');
+                document.getElementById('fordContent').classList.remove('active');
+                document.getElementById('3dContent').classList.remove('active');
+                document.getElementById('othersContent').classList.remove('active');
+                document.getElementById('moreContent').classList.remove('active');
+            }, 400);
+        }
+
+        function initScrollAnimations(containerId) {
+            gsap.registerPlugin(ScrollTrigger);
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const textElements = container.querySelectorAll('.animate-text');
+            gsap.set(textElements, { opacity: 0, y: 40 });
+
+            textElements.forEach((el) => {
+                gsap.to(el, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: el,
+                        scroller: "#detailPage",
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    }
+                });
+            });
+        }
+
+        function initGsapAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            const phones1 = document.querySelectorAll('#scene1 .phone');
+            phones1.forEach((phone) => {
+                const initRotate = parseInt(phone.dataset.initRotate);
+                const initX = parseInt(phone.dataset.initX);
+                const finalRotate = parseInt(phone.dataset.finalRotate);
+                const finalX = parseInt(phone.dataset.finalX);
+
+                gsap.set(phone, { rotation: initRotate, x: initX });
+
+                gsap.to(phone, {
+                    rotation: finalRotate,
+                    x: finalX,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: "#scene1",
+                        scroller: "#detailPage",
+                        start: "top 80%",
+                        end: "top 30%",
+                        scrub: 1.5
+                    }
+                });
+            });
+
+            const phones2 = document.querySelectorAll('#scene2 .phone');
+            phones2.forEach((phone) => {
+                const initRotate = parseInt(phone.dataset.initRotate);
+                const initX = parseInt(phone.dataset.initX);
+                const finalRotate = parseInt(phone.dataset.finalRotate);
+                const finalX = parseInt(phone.dataset.finalX);
+
+                gsap.set(phone, { rotation: initRotate, x: initX });
+
+                gsap.to(phone, {
+                    rotation: finalRotate,
+                    x: finalX,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: "#scene2",
+                        scroller: "#detailPage",
+                        start: "top 80%",
+                        end: "top 30%",
+                        scrub: 1.5
+                    }
+                });
+            });
+
+            initScrollAnimations('zhangLeContent');
+        }
+
+        function initJsBankGsapAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            initScrollAnimations('jsBankContent');
+        }
+
+        function initFordGsapAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            initScrollAnimations('fordContent');
+        }
+
+        function init3dGsapAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            initScrollAnimations('3dContent');
+        }
+
+        function initOthersGsapAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+            initScrollAnimations('othersContent');
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeDetail();
+                closeConnectModal();
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
